@@ -1,5 +1,7 @@
 export * from "./types.js";
 export * from "./skills.js";
+export * from "./skills-loader.js";
+export * from "./config.js";
 export * from "./project.js";
 export * from "./scanner.js";
 export * from "./templates.js";

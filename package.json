@@ -15,6 +15,8 @@
     "canvas": "npm run --workspace @onecompany/canvas-app dev",
     "canvas-config": "node apps/canvas-config-cli/index.mjs",
     "canvas-ai": "node apps/canvas-config-cli/ai-suggest.mjs",
+    "skills": "node apps/skills-manager-cli/index.mjs",
+    "generate-skills": "node apps/generate-canvas-skills/index.mjs",
     "clean": "find . -name dist -type d -prune -exec rm -rf {} +"
   },
   "devDependencies": {

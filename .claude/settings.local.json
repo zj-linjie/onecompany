@@ -20,7 +20,15 @@
       "Bash(open:*)",
       "Bash(chmod:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Initial commit - OneCompany Multi-Agent Framework\n\n🎉 OneCompany v0.2.0 - Multi-Agent 协作框架\n\n核心功能：\n- ✅ Multi-Agent 协作系统（Orchestrator, TaskQueue, Scheduler）\n- ✅ Canvas Skill Manager（可视化配置 Skills 和 Agents）\n- ✅ AI 智能配置建议（npm run canvas-ai）\n- ✅ CLI 快速配置命令（npm run canvas-config）\n- ✅ 项目管理流程（新建、接管、迭代）\n- ✅ Agent 自动任务分解和执行\n- ✅ Canvas 与 CLI 深度集成\n\n技术栈：\n- TypeScript + Node.js\n- React + Vite（Canvas 应用）\n- Zustand（状态管理）\n- React Flow（可视化画布）\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(gh:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(ls:*)",
+      "Bash(npm run skills:*)",
+      "Bash(npm run generate-skills)",
+      "Bash(npm run canvas-config:*)"
     ]
   }
 }

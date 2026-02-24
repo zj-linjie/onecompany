@@ -1,151 +1,75 @@
 /**
  * Skills 数据定义
+ * 从 skill-factory 生成的真实 Skills
  */
+
+import skillsGenerated from './skills-generated.json';
 
 export interface Skill {
   id: string;
   name: string;
   description: string;
-  category: 'backend' | 'frontend' | 'testing' | 'devops' | 'design';
+  category: 'backend' | 'frontend' | 'testing' | 'devops' | 'documentation' | 'tools' | 'architecture' | 'general';
   icon: string;
+  source?: string;
 }
 
-export const skillsData: Skill[] = [
-  // Backend Skills
-  {
-    id: 'api-development',
-    name: 'API 开发',
-    description: 'RESTful API 设计与实现，包括接口规范、版本控制',
-    category: 'backend',
-    icon: '🔧',
-  },
-  {
-    id: 'database-design',
-    name: '数据库设计',
-    description: 'SQL 和 NoSQL 数据库架构设计，性能优化',
-    category: 'backend',
-    icon: '🗄️',
-  },
-  {
-    id: 'authentication',
-    name: '身份认证',
-    description: 'JWT、OAuth 等认证方案，安全加密实现',
-    category: 'backend',
-    icon: '🔐',
-  },
-  {
-    id: 'graphql',
-    name: 'GraphQL',
-    description: 'GraphQL API 开发，查询优化和缓存策略',
-    category: 'backend',
-    icon: '📊',
-  },
+// 从生成的数据加载真实 Skills
+export const skillsData: Skill[] = skillsGenerated.skills.map((skill: any) => ({
+  id: skill.id,
+  name: skill.name,
+  description: skill.description,
+  category: skill.category as Skill['category'],
+  icon: skill.icon,
+  source: skill.source,
+}));
 
-  // Frontend Skills
-  {
-    id: 'react-dev',
-    name: 'React 开发',
-    description: '现代 React 开发，Hooks、TypeScript、性能优化',
-    category: 'frontend',
-    icon: '⚛️',
-  },
-  {
-    id: 'ui-design',
-    name: 'UI/UX 设计',
-    description: '用户界面和体验设计，交互原型，可用性测试',
-    category: 'frontend',
-    icon: '🎨',
-  },
-  {
-    id: 'responsive-layout',
-    name: '响应式布局',
-    description: '移动优先的响应式设计，跨设备适配',
-    category: 'frontend',
-    icon: '📱',
-  },
-  {
-    id: 'state-management',
-    name: '状态管理',
-    description: 'Redux、Zustand 等状态管理方案和最佳实践',
-    category: 'frontend',
-    icon: '🔄',
-  },
+// 按类别分组的 Skills
+export const skillsByCategory = skillsGenerated.byCategory;
 
-  // Testing Skills
-  {
-    id: 'unit-testing',
-    name: '单元测试',
-    description: 'Jest、Vitest 单元测试开发，TDD 实践',
-    category: 'testing',
-    icon: '✅',
-  },
-  {
-    id: 'integration-testing',
-    name: '集成测试',
-    description: 'API 和组件集成测试，端到端测试场景',
-    category: 'testing',
-    icon: '🔗',
-  },
-  {
-    id: 'e2e-testing',
-    name: 'E2E 测试',
-    description: 'Playwright、Cypress 端到端自动化测试',
-    category: 'testing',
-    icon: '🎭',
-  },
+// 获取所有类别
+export const categories = skillsGenerated.categories;
 
-  // DevOps Skills
-  {
-    id: 'docker',
-    name: 'Docker',
-    description: '容器化部署，Docker Compose 编排',
-    category: 'devops',
-    icon: '🐳',
-  },
-  {
-    id: 'ci-cd',
-    name: 'CI/CD',
-    description: '持续集成和部署，GitHub Actions、Jenkins',
-    category: 'devops',
-    icon: '🔄',
-  },
-  {
-    id: 'kubernetes',
-    name: 'Kubernetes',
-    description: '容器编排，K8s 集群管理和服务部署',
-    category: 'devops',
-    icon: '☸️',
-  },
-
-  // Design Skills
-  {
-    id: 'figma',
-    name: 'Figma 设计',
-    description: 'UI 设计和原型制作，设计系统搭建',
-    category: 'design',
-    icon: '🎨',
-  },
-  {
-    id: 'design-system',
-    name: '设计系统',
-    description: '组件库和设计规范，Design Tokens 管理',
-    category: 'design',
-    icon: '📐',
-  },
-];
-
-export const categoryLabels = {
-  backend: 'Backend Skills',
-  frontend: 'Frontend Skills',
-  testing: 'Testing Skills',
-  devops: 'DevOps Skills',
-  design: 'Design Skills',
+// 统计信息
+export const skillsStats = {
+  total: skillsGenerated.totalSkills,
+  sources: skillsGenerated.sources,
+  generatedAt: skillsGenerated.generatedAt,
 };
 
-export const categoryIcons = {
-  backend: '📦',
-  frontend: '🎨',
-  testing: '🧪',
-  devops: '🔧',
-  design: '✨',
-};
+// 搜索 Skills
+export function searchSkills(query: string): Skill[] {
+  const lowerQuery = query.toLowerCase();
+  return skillsData.filter(
+    (skill) =>
+      skill.name.toLowerCase().includes(lowerQuery) ||
+      skill.description.toLowerCase().includes(lowerQuery) ||
+      skill.id.toLowerCase().includes(lowerQuery)
+  );
+}
+
+// 按类别获取 Skills
+export function getSkillsByCategory(category: string): Skill[] {
+  return skillsData.filter((skill) => skill.category === category);
+}
+
+// 获取推荐的 Skills
+export function getRecommendedSkills(projectType: 'frontend' | 'backend' | 'fullstack'): Skill[] {
+  if (projectType === 'frontend') {
+    return skillsData.filter((s) =>
+      s.category === 'frontend' || s.category === 'testing' || s.category === 'devops'
+    );
+  }
+  if (projectType === 'backend') {
+    return skillsData.filter((s) =>
+      s.category === 'backend' || s.category === 'testing' || s.category === 'devops'
+    );
+  }
+  // fullstack
+  return skillsData.filter((s) =>
+    s.category === 'frontend' ||
+    s.category === 'backend' ||
+    s.category === 'testing' ||
+    s.category === 'devops'
+  );
+}

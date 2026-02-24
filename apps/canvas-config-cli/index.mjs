@@ -2,11 +2,15 @@
 
 /**
  * Canvas 配置 CLI 工具
- * 快速配置 Skills 和 Agents
+ * 使用真实的 skill-factory 数据
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
+import {
+  loadSkillsFromFactory,
+  getSkillFactoryPath,
+} from "@onecompany/core";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -17,6 +21,21 @@ const value = args[2];
 const cwd = process.cwd();
 const configDir = path.join(cwd, ".onecompany");
 const configPath = path.join(configDir, "canvas-config.json");
+
+// 缓存加载的 Skills
+let cachedSkills = null;
+
+// 加载真实的 Skills
+async function loadRealSkills() {
+  if (cachedSkills) {
+    return cachedSkills;
+  }
+
+  const factoryPath = await getSkillFactoryPath();
+  const result = await loadSkillsFromFactory(factoryPath);
+  cachedSkills = result;
+  return result;
+}
 
 // 确保配置目录存在
 function ensureConfigDir() {
@@ -54,72 +73,52 @@ function saveConfig(config) {
   writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
 }
 
-// 预定义的 Skills
-const SKILLS = {
-  "react-dev": {
-    name: "React 开发",
-    description: "现代 React 开发，Hooks、TypeScript、性能优化",
-  },
-  "api-development": {
-    name: "API 开发",
-    description: "RESTful API 设计与实现，包括接口规范、版本控制",
-  },
-  "database-design": {
-    name: "数据库设计",
-    description: "SQL 和 NoSQL 数据库架构设计，性能优化",
-  },
-  "ui-design": {
-    name: "UI/UX 设计",
-    description: "用户界面和体验设计，交互原型，可用性测试",
-  },
-  "unit-testing": {
-    name: "单元测试",
-    description: "Jest、Vitest 等测试框架，TDD 实践",
-  },
-  "authentication": {
-    name: "身份认证",
-    description: "JWT、OAuth 等认证方案，安全加密实现",
-  },
-  "state-management": {
-    name: "状态管理",
-    description: "Redux、Zustand 等状态管理方案和最佳实践",
-  },
-  "docker": {
-    name: "Docker",
-    description: "容器化部署，Docker Compose 编排",
-  },
-  "ci-cd": {
-    name: "CI/CD",
-    description: "持续集成和部署，GitHub Actions、Jenkins",
-  },
-};
-
-// 预定义的 Agents
+// 预定义的 Agents（这些是真实可用的）
 const AGENTS = {
+  "product-manager": {
+    name: "产品经理",
+    specialization: "需求分析和任务分解",
+    skills: ["brainstorming", "writing-plans"],
+  },
+  "architect": {
+    name: "架构师",
+    specialization: "系统架构设计",
+    skills: ["architecture-design", "system-design"],
+  },
   "frontend-dev": {
     name: "前端开发工程师",
-    specialization: "React 和 UI/UX 专家",
-    skills: ["react-dev", "ui-design", "state-management"],
+    specialization: "前端开发专家",
+    skills: ["canvas-design", "artifacts-builder"],
   },
   "backend-dev": {
     name: "后端开发工程师",
-    specialization: "API 和数据库专家",
-    skills: ["api-development", "database-design", "authentication"],
+    specialization: "后端开发专家",
+    skills: ["mcp-builder"],
   },
   "fullstack-dev": {
     name: "全栈开发工程师",
-    specialization: "端到端全栈开发",
-    skills: ["api-development", "react-dev", "database-design"],
+    specialization: "全栈开发",
+    skills: ["canvas-design", "mcp-builder"],
   },
-  devops: {
+  "devops": {
     name: "DevOps 工程师",
     specialization: "CI/CD 和基础设施",
-    skills: ["docker", "ci-cd"],
+    skills: ["using-git-worktrees"],
   },
-  tester: {
+  "tester": {
     name: "测试工程师",
-    specialization: "质量保证专家",
-    skills: ["unit-testing", "integration-testing", "e2e-testing"],
+    specialization: "质量保证",
+    skills: ["test-driven-development", "systematic-debugging"],
+  },
+  "spec-reviewer": {
+    name: "规格审查员",
+    specialization: "需求审查",
+    skills: ["verification-before-completion"],
+  },
+  "code-reviewer": {
+    name: "代码审查员",
+    specialization: "代码质量审查",
+    skills: ["requesting-code-review"],
   },
 };
 
@@ -152,20 +151,27 @@ function cmdList() {
 }
 
 // 命令：add-skill - 添加 Skill
-function cmdAddSkill(skillId) {
-  if (!skillId || !SKILLS[skillId]) {
-    console.error(`❌ 未知的 Skill: ${skillId}`);
-    console.log("\n可用的 Skills:");
-    Object.keys(SKILLS).forEach((id) => {
-      console.log(`  - ${id}: ${SKILLS[id].name}`);
-    });
+async function cmdAddSkill(skillId) {
+  if (!skillId) {
+    console.error("❌ 请提供 Skill ID");
+    console.log("用法: npm run canvas-config add-skill <skill-id>");
+    console.log("\n💡 使用 'npm run skills search <关键词>' 搜索可用的 Skills");
+    process.exit(1);
+  }
+
+  // 加载真实的 Skills
+  const skillsData = await loadRealSkills();
+  const skill = skillsData.skills.find((s) => s.id === skillId);
+
+  if (!skill) {
+    console.error(`❌ 未找到 Skill: ${skillId}`);
+    console.log("\n💡 使用 'npm run skills list' 查看所有可用的 Skills");
+    console.log("💡 使用 'npm run skills search <关键词>' 搜索 Skills");
     process.exit(1);
   }
 
   const config = loadConfig();
-  const skill = SKILLS[skillId];
 
-  // 检查是否已存在
   const exists = config.nodes.find(
     (n) => n.type === "skill" && n.skillId === skillId
   );
@@ -174,14 +180,15 @@ function cmdAddSkill(skillId) {
     return;
   }
 
-  // 添加 Skill
   const newSkill = {
     id: `skill-${Date.now()}`,
     type: "skill",
-    skillId,
+    skillId: skill.id,
     name: skill.name,
     description: skill.description,
     enabled: true,
+    category: skill.category,
+    source: skill.source,
     position: { x: 100, y: 100 + config.nodes.length * 50 },
     connections: [],
   };
@@ -190,6 +197,8 @@ function cmdAddSkill(skillId) {
   saveConfig(config);
 
   console.log(`✅ 已添加 Skill: ${skill.name}`);
+  console.log(`   类别: ${skill.category}`);
+  console.log(`   来源: ${skill.source}`);
 }
 
 // 命令：add-agent - 添加 Agent
@@ -206,7 +215,6 @@ function cmdAddAgent(agentRole) {
   const config = loadConfig();
   const agent = AGENTS[agentRole];
 
-  // 检查是否已存在
   const exists = config.nodes.find(
     (n) => n.type === "agent" && n.role === agentRole
   );
@@ -215,39 +223,30 @@ function cmdAddAgent(agentRole) {
     return;
   }
 
-  // 添加 Agent
   const newAgent = {
     id: `agent-${Date.now()}`,
     type: "agent",
     role: agentRole,
     name: agent.name,
+    specialization: agent.specialization,
     skills: agent.skills,
     enabled: true,
-    position: { x: 700, y: 100 + config.nodes.length * 50 },
-    specialization: agent.specialization,
+    position: { x: 600, y: 100 + config.nodes.length * 50 },
+    connections: [],
   };
 
   config.nodes.push(newAgent);
   saveConfig(config);
 
   console.log(`✅ 已添加 Agent: ${agent.name}`);
+  console.log(`   角色: ${agentRole}`);
+  console.log(`   技能: ${agent.skills.join(", ")}`);
 }
 
 // 命令：enable/disable - 启用/禁用节点
 function cmdToggle(nodeId, enable) {
   const config = loadConfig();
-
-  // 查找节点
-  let node = config.nodes.find((n) => n.id === nodeId);
-
-  // 如果没找到，尝试通过 skillId 或 role 查找
-  if (!node) {
-    node = config.nodes.find(
-      (n) =>
-        (n.type === "skill" && n.skillId === nodeId) ||
-        (n.type === "agent" && n.role === nodeId)
-    );
-  }
+  const node = config.nodes.find((n) => n.id === nodeId);
 
   if (!node) {
     console.error(`❌ 未找到节点: ${nodeId}`);
@@ -264,13 +263,7 @@ function cmdToggle(nodeId, enable) {
 // 命令：remove - 删除节点
 function cmdRemove(nodeId) {
   const config = loadConfig();
-
-  const index = config.nodes.findIndex(
-    (n) =>
-      n.id === nodeId ||
-      (n.type === "skill" && n.skillId === nodeId) ||
-      (n.type === "agent" && n.role === nodeId)
-  );
+  const index = config.nodes.findIndex((n) => n.id === nodeId);
 
   if (index === -1) {
     console.error(`❌ 未找到节点: ${nodeId}`);
@@ -284,75 +277,118 @@ function cmdRemove(nodeId) {
   console.log(`✅ 已删除: ${node.name}`);
 }
 
-// 命令：init - 初始化配置
-function cmdInit(template) {
-  const config = loadConfig();
+// 命令：init - 从模板初始化
+async function cmdInit(template) {
+  const templates = {
+    fullstack: {
+      name: "全栈应用",
+      skills: [
+        "canvas-design",
+        "mcp-builder",
+        "test-driven-development",
+        "using-git-worktrees",
+      ],
+      agents: ["frontend-dev", "backend-dev", "devops", "tester"],
+    },
+    frontend: {
+      name: "前端应用",
+      skills: ["canvas-design", "artifacts-builder", "test-driven-development"],
+      agents: ["frontend-dev", "tester"],
+    },
+    backend: {
+      name: "后端应用",
+      skills: ["mcp-builder", "test-driven-development", "using-git-worktrees"],
+      agents: ["backend-dev", "tester", "devops"],
+    },
+  };
 
-  if (template === "fullstack") {
-    // 全栈模板
-    cmdAddSkill("react-dev");
-    cmdAddSkill("api-development");
-    cmdAddSkill("database-design");
-    cmdAddSkill("authentication");
-    cmdAddAgent("frontend-dev");
-    cmdAddAgent("backend-dev");
-    cmdAddAgent("devops");
-    console.log("\n✅ 已初始化全栈项目配置");
-  } else if (template === "frontend") {
-    // 前端模板
-    cmdAddSkill("react-dev");
-    cmdAddSkill("ui-design");
-    cmdAddSkill("state-management");
-    cmdAddAgent("frontend-dev");
-    console.log("\n✅ 已初始化前端项目配置");
-  } else if (template === "backend") {
-    // 后端模板
-    cmdAddSkill("api-development");
-    cmdAddSkill("database-design");
-    cmdAddSkill("authentication");
-    cmdAddAgent("backend-dev");
-    cmdAddAgent("devops");
-    console.log("\n✅ 已初始化后端项目配置");
-  } else {
-    console.error("❌ 未知的模板类型");
+  if (!template || !templates[template]) {
+    console.error(`❌ 未知模板: ${template}`);
     console.log("\n可用的模板:");
-    console.log("  - fullstack: 全栈项目");
-    console.log("  - frontend: 前端项目");
-    console.log("  - backend: 后端项目");
+    Object.keys(templates).forEach((t) => {
+      console.log(`  - ${t}: ${templates[t].name}`);
+    });
     process.exit(1);
   }
+
+  const config = loadConfig();
+  const tmpl = templates[template];
+
+  console.log(`\n🚀 初始化 "${tmpl.name}" 模板...\n`);
+
+  // 加载真实的 Skills
+  const skillsData = await loadRealSkills();
+
+  // 添加 Skills
+  for (const skillId of tmpl.skills) {
+    const skill = skillsData.skills.find((s) => s.id === skillId);
+    if (skill) {
+      const exists = config.nodes.find(
+        (n) => n.type === "skill" && n.skillId === skillId
+      );
+      if (!exists) {
+        config.nodes.push({
+          id: `skill-${Date.now()}-${Math.random()}`,
+          type: "skill",
+          skillId: skill.id,
+          name: skill.name,
+          description: skill.description,
+          enabled: true,
+          category: skill.category,
+          source: skill.source,
+          position: { x: 100, y: 100 + config.nodes.length * 50 },
+          connections: [],
+        });
+        console.log(`  ✓ 添加 Skill: ${skill.name}`);
+      }
+    }
+  }
+
+  // 添加 Agents
+  for (const agentRole of tmpl.agents) {
+    const agent = AGENTS[agentRole];
+    if (agent) {
+      const exists = config.nodes.find(
+        (n) => n.type === "agent" && n.role === agentRole
+      );
+      if (!exists) {
+        config.nodes.push({
+          id: `agent-${Date.now()}-${Math.random()}`,
+          type: "agent",
+          role: agentRole,
+          name: agent.name,
+          specialization: agent.specialization,
+          skills: agent.skills,
+          enabled: true,
+          position: { x: 600, y: 100 + config.nodes.length * 50 },
+          connections: [],
+        });
+        console.log(`  ✓ 添加 Agent: ${agent.name}`);
+      }
+    }
+  }
+
+  saveConfig(config);
+  console.log(`\n✅ 模板初始化完成`);
 }
 
-// 显示帮助
-function showHelp() {
+// 命令：help - 显示帮助
+function cmdHelp() {
   console.log(`
-Canvas 配置 CLI 工具
-
-用法:
-  canvas-config <command> [options]
+╔════════════════════════════════════════════════════════════════╗
+║                  Canvas 配置 CLI 工具                          ║
+║              使用真实的 skill-factory 数据                      ║
+╚════════════════════════════════════════════════════════════════╝
 
 命令:
-  list                          列出当前配置
-  add-skill <skill-id>          添加 Skill
-  add-agent <agent-role>        添加 Agent
-  enable <node-id>              启用节点
-  disable <node-id>             禁用节点
-  remove <node-id>              删除节点
-  init <template>               从模板初始化配置
-
-示例:
-  canvas-config list
-  canvas-config add-skill react-dev
-  canvas-config add-agent frontend-dev
-  canvas-config enable frontend-dev
-  canvas-config disable react-dev
-  canvas-config remove frontend-dev
-  canvas-config init fullstack
-
-可用的 Skills:
-${Object.keys(SKILLS)
-  .map((id) => `  - ${id}: ${SKILLS[id].name}`)
-  .join("\n")}
+  list                    列出当前配置
+  add-skill <skill-id>    添加 Skill
+  add-agent <agent-role>  添加 Agent
+  enable <node-id>        启用节点
+  disable <node-id>       禁用节点
+  remove <node-id>        删除节点
+  init <template>         从模板初始化
+  help                    显示此帮助
 
 可用的 Agents:
 ${Object.keys(AGENTS)
@@ -360,46 +396,50 @@ ${Object.keys(AGENTS)
   .join("\n")}
 
 可用的模板:
-  - fullstack: 全栈项目（React + API + 数据库）
-  - frontend: 前端项目（React + UI）
-  - backend: 后端项目（API + 数据库）
+  - fullstack: 全栈应用
+  - frontend: 前端应用
+  - backend: 后端应用
+
+示例:
+  npm run canvas-config list
+  npm run canvas-config add-skill canvas-design
+  npm run canvas-config add-agent frontend-dev
+  npm run canvas-config init fullstack
+
+💡 使用 'npm run skills list' 查看所有可用的 Skills
+💡 使用 'npm run skills search <关键词>' 搜索 Skills
 `);
 }
 
 // 主函数
-function main() {
-  if (!command || command === "help" || command === "--help" || command === "-h") {
-    showHelp();
+async function main() {
+  if (!command || command === "help") {
+    cmdHelp();
     return;
   }
 
-  switch (command) {
-    case "list":
-      cmdList();
-      break;
-    case "add-skill":
-      cmdAddSkill(subcommand);
-      break;
-    case "add-agent":
-      cmdAddAgent(subcommand);
-      break;
-    case "enable":
-      cmdToggle(subcommand, true);
-      break;
-    case "disable":
-      cmdToggle(subcommand, false);
-      break;
-    case "remove":
-      cmdRemove(subcommand);
-      break;
-    case "init":
-      cmdInit(subcommand);
-      break;
-    default:
-      console.error(`❌ 未知命令: ${command}`);
-      console.log("\n运行 'canvas-config help' 查看帮助");
-      process.exit(1);
+  if (command === "list") {
+    cmdList();
+  } else if (command === "add-skill") {
+    await cmdAddSkill(subcommand);
+  } else if (command === "add-agent") {
+    cmdAddAgent(subcommand);
+  } else if (command === "enable") {
+    cmdToggle(subcommand, true);
+  } else if (command === "disable") {
+    cmdToggle(subcommand, false);
+  } else if (command === "remove") {
+    cmdRemove(subcommand);
+  } else if (command === "init") {
+    await cmdInit(subcommand);
+  } else {
+    console.error(`❌ 未知命令: ${command}`);
+    cmdHelp();
+    process.exit(1);
   }
 }
 
-main();
+main().catch((error) => {
+  console.error("❌ 错误:", error.message);
+  process.exit(1);
+});
