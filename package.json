@@ -12,6 +12,7 @@
     "typecheck": "npm run --workspace @onecompany/core build && npm run --workspace @onecompany/skills-catalog build && npm run --workspace @onecompany/flow-new-project build && npm run --workspace @onecompany/flow-takeover build && npm run --workspace @onecompany/flow-iterate build && npm run --workspace @onecompany/cli typecheck",
     "start": "npm run --workspace @onecompany/cli start",
     "onecompany": "npm run --workspace @onecompany/cli start",
+    "canvas": "npm run --workspace @onecompany/canvas-app dev",
     "canvas-config": "node apps/canvas-config-cli/index.mjs",
     "canvas-ai": "node apps/canvas-config-cli/ai-suggest.mjs",
     "clean": "find . -name dist -type d -prune -exec rm -rf {} +"
