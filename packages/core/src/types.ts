@@ -96,6 +96,7 @@ export interface TaskResult {
   output: string;
   artifacts?: string[];
   nextSteps?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface Task {

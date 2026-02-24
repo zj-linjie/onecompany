@@ -10,6 +10,7 @@ import { existsSync } from "node:fs";
 
 export interface OneCompanyConfig {
   skillFactoryPath: string;
+  anthropicApiKey?: string;
   version: string;
 }
 
@@ -77,4 +78,28 @@ export async function updateSkillFactoryPath(path: string): Promise<void> {
 export async function getSkillFactoryPath(): Promise<string> {
   const config = await loadConfig();
   return config.skillFactoryPath;
+}
+
+/**
+ * 获取 Anthropic API Key
+ * 优先从环境变量读取，其次从配置文件
+ */
+export async function getAnthropicApiKey(): Promise<string | undefined> {
+  // 优先使用环境变量
+  if (process.env.ANTHROPIC_API_KEY) {
+    return process.env.ANTHROPIC_API_KEY;
+  }
+
+  // 其次使用配置文件
+  const config = await loadConfig();
+  return config.anthropicApiKey;
+}
+
+/**
+ * 设置 Anthropic API Key
+ */
+export async function setAnthropicApiKey(apiKey: string): Promise<void> {
+  const config = await loadConfig();
+  config.anthropicApiKey = apiKey;
+  await saveConfig(config);
 }

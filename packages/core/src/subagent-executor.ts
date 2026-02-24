@@ -1,24 +1,28 @@
 /**
  * Subagent 执行器
- * 通过 Task tool 派发 subagent 来执行任务
+ * 使用 Anthropic API 实现真实的 Agent 执行
  */
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import Anthropic from "@anthropic-ai/sdk";
 import type { Task, TaskResult, AgentRole, AgentContext } from "./types.js";
 import { BaseAgent } from "./agent.js";
+import { getAnthropicApiKey } from "./config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export interface SubagentConfig {
-  model?: "sonnet" | "opus" | "haiku";
+  model?: "claude-sonnet-4-5-20250929" | "claude-opus-4-6" | "claude-haiku-4-5-20251001";
   timeout?: number;
+  maxTokens?: number;
 }
 
 export class SubagentExecutor extends BaseAgent {
   private promptsDir: string;
+  private anthropic: Anthropic | null = null;
 
   constructor(
     id: string,
@@ -31,6 +35,25 @@ export class SubagentExecutor extends BaseAgent {
     this.promptsDir = promptsDir || path.join(__dirname, "prompts");
   }
 
+  /**
+   * 初始化 Anthropic 客户端
+   */
+  private async initAnthropicClient(): Promise<Anthropic> {
+    if (this.anthropic) {
+      return this.anthropic;
+    }
+
+    const apiKey = await getAnthropicApiKey();
+    if (!apiKey) {
+      throw new Error(
+        "Anthropic API Key not found. Please set ANTHROPIC_API_KEY environment variable or run 'npm run config set-api-key'"
+      );
+    }
+
+    this.anthropic = new Anthropic({ apiKey });
+    return this.anthropic;
+  }
+
   async execute(task: Task, context: AgentContext, config?: SubagentConfig): Promise<TaskResult> {
     try {
       // 1. 加载 agent prompt 模板
@@ -39,9 +62,7 @@ export class SubagentExecutor extends BaseAgent {
       // 2. 构建完整的 prompt
       const fullPrompt = this.buildPrompt(promptTemplate, task, context);
 
-      // 3. 派发 subagent（这里需要实际调用 Task tool）
-      // 注意：在实际环境中，这会通过 Claude Code 的 Task tool 执行
-      // 目前我们先返回一个模拟结果，后续需要集成真实的 Task tool
+      // 3. 派发 subagent（真实的 API 调用）
       const result = await this.dispatchSubagent(fullPrompt, config);
 
       return result;
@@ -103,7 +124,11 @@ ${taskInfo}
 
 ---
 
-Please execute this task following the guidelines above. If you have any questions, ask them first before starting implementation.
+Please execute this task following the guidelines above. Provide a detailed response including:
+1. Your analysis of the task
+2. The steps you took
+3. The results or output
+4. Any next steps or recommendations
 `;
   }
 
@@ -130,26 +155,107 @@ Please execute this task following the guidelines above. If you have any questio
     return info;
   }
 
+  /**
+   * 真实的 Subagent 派发实现
+   * 使用 Anthropic API 执行任务
+   */
   private async dispatchSubagent(prompt: string, config?: SubagentConfig): Promise<TaskResult> {
-    // TODO: 实际实现需要调用 Claude Code 的 Task tool
-    // 这里先返回一个占位实现
+    try {
+      console.log(`[SubagentExecutor] Dispatching ${this.role} agent...`);
+      console.log(`[SubagentExecutor] Prompt length: ${prompt.length} characters`);
 
-    // 在真实环境中，这应该是：
-    // const result = await Task({
-    //   description: `Execute ${this.role} task`,
-    //   prompt: prompt,
-    //   subagent_type: "general-purpose",
-    //   model: config?.model || "sonnet",
-    // });
+      // 初始化 Anthropic 客户端
+      const anthropic = await this.initAnthropicClient();
 
-    console.log(`[SubagentExecutor] Would dispatch ${this.role} agent with prompt length: ${prompt.length}`);
+      // 选择模型
+      const model = config?.model || "claude-sonnet-4-5-20250929";
+      const maxTokens = config?.maxTokens || 8000;
 
-    // 返回模拟结果
-    return {
-      success: true,
-      output: `[SIMULATED] ${this.role} agent would execute the task here`,
-      nextSteps: ["Integrate with actual Task tool"],
-    };
+      console.log(`[SubagentExecutor] Using model: ${model}`);
+
+      // 调用 Anthropic API
+      const startTime = Date.now();
+      const response = await anthropic.messages.create({
+        model,
+        max_tokens: maxTokens,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      });
+
+      const duration = Date.now() - startTime;
+      console.log(`[SubagentExecutor] Response received in ${duration}ms`);
+
+      // 提取响应内容
+      const content = response.content
+        .filter((block) => block.type === "text")
+        .map((block) => (block as any).text)
+        .join("\n");
+
+      // 解析响应
+      const result = this.parseResponse(content);
+
+      console.log(`[SubagentExecutor] Task completed successfully`);
+
+      return {
+        success: true,
+        output: content,
+        nextSteps: result.nextSteps,
+        metadata: {
+          model,
+          duration,
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+          stopReason: response.stop_reason,
+        },
+      };
+    } catch (error) {
+      console.error(`[SubagentExecutor] Error dispatching subagent:`, error);
+
+      if (error instanceof Anthropic.APIError) {
+        return {
+          success: false,
+          output: `API Error: ${error.message}`,
+          metadata: {
+            errorType: error.constructor.name,
+            statusCode: error.status,
+          },
+        };
+      }
+
+      return {
+        success: false,
+        output: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+  }
+
+  /**
+   * 解析 Agent 响应，提取关键信息
+   */
+  private parseResponse(content: string): { nextSteps: string[] } {
+    const nextSteps: string[] = [];
+
+    // 尝试提取 "Next Steps" 或 "下一步" 部分
+    const nextStepsRegex = /(?:Next Steps?|下一步|Recommendations?|建议)[:\s]*\n((?:[-*]\s*.+\n?)+)/gi;
+    const matches = content.match(nextStepsRegex);
+
+    if (matches) {
+      for (const match of matches) {
+        const lines = match.split("\n");
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("-") || trimmed.startsWith("*")) {
+            nextSteps.push(trimmed.substring(1).trim());
+          }
+        }
+      }
+    }
+
+    return { nextSteps };
   }
 }
 
@@ -163,11 +269,11 @@ export function createAgentExecutor(
   const skillMapping: Record<AgentRole, string[]> = {
     "product-manager": ["brainstorming", "writing-plans", "task-decomposition"],
     "architect": ["architecture-design", "system-design", "technical-planning"],
-    "frontend-dev": ["react", "vue", "css", "ui-testing"],
-    "backend-dev": ["api-design", "database", "authentication", "testing"],
-    "spec-reviewer": ["requirement-analysis", "acceptance-testing"],
-    "code-reviewer": ["code-quality", "best-practices", "security-review"],
-    "tester": ["unit-testing", "integration-testing", "e2e-testing"],
+    "frontend-dev": ["canvas-design", "artifacts-builder"],
+    "backend-dev": ["mcp-builder", "api-design", "database"],
+    "spec-reviewer": ["verification-before-completion", "requirement-analysis"],
+    "code-reviewer": ["requesting-code-review", "code-quality", "best-practices"],
+    "tester": ["test-driven-development", "systematic-debugging"],
   };
 
   const skills = skillMapping[role] || [];

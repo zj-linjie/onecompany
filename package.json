@@ -17,6 +17,8 @@
     "canvas-ai": "node apps/canvas-config-cli/ai-suggest.mjs",
     "skills": "node apps/skills-manager-cli/index.mjs",
     "generate-skills": "node apps/generate-canvas-skills/index.mjs",
+    "config": "node apps/config-cli/index.mjs",
+    "test-agent": "node apps/test-agent/index.mjs",
     "clean": "find . -name dist -type d -prune -exec rm -rf {} +"
   },
   "devDependencies": {
