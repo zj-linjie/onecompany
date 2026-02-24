@@ -29,7 +29,8 @@
       "Bash(npm run skills:*)",
       "Bash(npm run generate-skills)",
       "Bash(npm run canvas-config:*)",
-      "Bash(npm run config:*)"
+      "Bash(npm run config:*)",
+      "Bash(npm run test-agent)"
     ]
   }
 }

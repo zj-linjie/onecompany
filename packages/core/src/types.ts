@@ -78,9 +78,11 @@ export type AgentRole =
   | "architect"
   | "frontend-dev"
   | "backend-dev"
+  | "fullstack-dev"
+  | "devops"
+  | "tester"
   | "spec-reviewer"
-  | "code-reviewer"
-  | "tester";
+  | "code-reviewer";
 
 export interface AgentContext {
   workspacePath: string;

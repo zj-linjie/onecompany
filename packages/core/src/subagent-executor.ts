@@ -77,12 +77,14 @@ export class SubagentExecutor extends BaseAgent {
   private async loadPromptTemplate(role: AgentRole): Promise<string> {
     const promptFiles: Record<AgentRole, string> = {
       "product-manager": "pm-agent-prompt.md",
-      "architect": "dev-agent-prompt.md", // 架构师使用开发者模板
+      "architect": "dev-agent-prompt.md",
       "frontend-dev": "dev-agent-prompt.md",
       "backend-dev": "dev-agent-prompt.md",
+      "fullstack-dev": "dev-agent-prompt.md",
+      "devops": "dev-agent-prompt.md",
+      "tester": "dev-agent-prompt.md",
       "spec-reviewer": "spec-reviewer-prompt.md",
       "code-reviewer": "code-reviewer-prompt.md",
-      "tester": "dev-agent-prompt.md", // 测试者使用开发者模板
     };
 
     const filename = promptFiles[role];
@@ -271,9 +273,11 @@ export function createAgentExecutor(
     "architect": ["architecture-design", "system-design", "technical-planning"],
     "frontend-dev": ["canvas-design", "artifacts-builder"],
     "backend-dev": ["mcp-builder", "api-design", "database"],
+    "fullstack-dev": ["canvas-design", "mcp-builder"],
+    "devops": ["using-git-worktrees", "docker", "ci-cd"],
+    "tester": ["test-driven-development", "systematic-debugging"],
     "spec-reviewer": ["verification-before-completion", "requirement-analysis"],
     "code-reviewer": ["requesting-code-review", "code-quality", "best-practices"],
-    "tester": ["test-driven-development", "systematic-debugging"],
   };
 
   const skills = skillMapping[role] || [];

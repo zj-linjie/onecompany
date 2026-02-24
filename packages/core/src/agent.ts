@@ -32,9 +32,11 @@ export abstract class BaseAgent implements Agent {
       "architect": ["architecture", "general"],
       "frontend-dev": ["frontend"],
       "backend-dev": ["backend"],
+      "fullstack-dev": ["frontend", "backend"],
+      "devops": ["general"],
+      "tester": ["testing", "general"],
       "spec-reviewer": ["general"],
       "code-reviewer": ["general"],
-      "tester": ["testing", "general"],
     };
 
     return roleTaskMapping[this.role]?.includes(taskType) || false;
