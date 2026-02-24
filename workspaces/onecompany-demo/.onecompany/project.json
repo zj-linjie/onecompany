@@ -1,0 +1,91 @@
+{
+  "projectName": "onecompany-demo",
+  "projectDescription": "混合型示例项目",
+  "productMode": "mixed",
+  "createdAt": "2026-02-23T14:30:47.272Z",
+  "roleBundles": [
+    {
+      "role": "基础必备包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch"
+      ]
+    },
+    {
+      "role": "前端工程师包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "webapp-testing",
+        "canvas-design",
+        "theme-factory",
+        "gh-fix-ci"
+      ]
+    },
+    {
+      "role": "后端/全栈包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "mcp-builder",
+        "using-git-worktrees",
+        "gh-address-comments",
+        "gh-fix-ci"
+      ]
+    },
+    {
+      "role": "架构师包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "create-plan",
+        "mcp-builder",
+        "subagent-driven-development"
+      ]
+    },
+    {
+      "role": "产品与文档包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "meeting-notes-and-actions",
+        "internal-comms",
+        "changelog-generator",
+        "content-research-writer"
+      ]
+    },
+    {
+      "role": "协同运营包",
+      "skills": [
+        "linear",
+        "connect",
+        "connect-apps"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "onecompany",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One-person company AI dev team orchestrator (CLI-first, TypeScript monorepo)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspace @onecompany/core build && npm run --workspace @onecompany/skills-catalog build && npm run --workspace @onecompany/flow-new-project build && npm run --workspace @onecompany/flow-takeover build && npm run --workspace @onecompany/flow-iterate build && npm run --workspace @onecompany/cli build",
+    "typecheck": "npm run --workspace @onecompany/core build && npm run --workspace @onecompany/skills-catalog build && npm run --workspace @onecompany/flow-new-project build && npm run --workspace @onecompany/flow-takeover build && npm run --workspace @onecompany/flow-iterate build && npm run --workspace @onecompany/cli typecheck",
+    "start": "npm run --workspace @onecompany/cli start",
+    "onecompany": "npm run --workspace @onecompany/cli start",
+    "canvas-config": "node apps/canvas-config-cli/index.mjs",
+    "canvas-ai": "node apps/canvas-config-cli/ai-suggest.mjs",
+    "clean": "find . -name dist -type d -prune -exec rm -rf {} +"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

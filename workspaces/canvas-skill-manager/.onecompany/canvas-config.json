@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "id": "project-1",
+    "type": "project",
+    "name": "Canvas Skill Manager",
+    "path": "/Users/apple/dev/onecompany/workspaces/canvas-skill-manager",
+    "activeSkills": [],
+    "activeAgents": [],
+    "position": { "x": 400, "y": 300 }
+  },
+  "nodes": [
+    {
+      "id": "skill-react",
+      "type": "skill",
+      "skillId": "react-dev",
+      "name": "React 开发",
+      "description": "现代 React 开发，Hooks、TypeScript、性能优化",
+      "enabled": true,
+      "position": { "x": 100, "y": 150 },
+      "connections": []
+    },
+    {
+      "id": "skill-api",
+      "type": "skill",
+      "skillId": "api-development",
+      "name": "API 开发",
+      "description": "RESTful API 设计与实现，包括接口规范、版本控制",
+      "enabled": true,
+      "position": { "x": 100, "y": 280 },
+      "connections": []
+    },
+    {
+      "id": "skill-database",
+      "type": "skill",
+      "skillId": "database-design",
+      "name": "数据库设计",
+      "description": "SQL 和 NoSQL 数据库架构设计，性能优化",
+      "enabled": true,
+      "position": { "x": 100, "y": 410 },
+      "connections": []
+    },
+    {
+      "id": "skill-testing",
+      "type": "skill",
+      "skillId": "unit-testing",
+      "name": "单元测试",
+      "description": "Jest、Vitest 等测试框架，TDD 实践",
+      "enabled": true,
+      "position": { "x": 100, "y": 540 },
+      "connections": []
+    },
+    {
+      "id": "agent-frontend",
+      "type": "agent",
+      "role": "frontend-dev",
+      "name": "前端开发工程师",
+      "skills": ["react-dev", "ui-design", "state-management"],
+      "enabled": true,
+      "position": { "x": 700, "y": 150 },
+      "specialization": "React 和 UI/UX 专家"
+    },
+    {
+      "id": "agent-backend",
+      "type": "agent",
+      "role": "backend-dev",
+      "name": "后端开发工程师",
+      "skills": ["api-development", "database-design", "authentication"],
+      "enabled": true,
+      "position": { "x": 700, "y": 350 },
+      "specialization": "API 和数据库专家"
+    },
+    {
+      "id": "agent-tester",
+      "type": "agent",
+      "role": "tester",
+      "name": "测试工程师",
+      "skills": ["unit-testing", "integration-testing", "e2e-testing"],
+      "enabled": true,
+      "position": { "x": 700, "y": 550 },
+      "specialization": "质量保证专家"
+    }
+  ],
+  "connections": []
+}

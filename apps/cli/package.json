@@ -1,0 +1,23 @@
+{
+  "name": "@onecompany/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "onecompany": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@onecompany/core": "0.1.0",
+    "@onecompany/flow-iterate": "0.1.0",
+    "@onecompany/flow-new-project": "0.1.0",
+    "@onecompany/flow-takeover": "0.1.0",
+    "@onecompany/skills-catalog": "0.1.0"
+  }
+}

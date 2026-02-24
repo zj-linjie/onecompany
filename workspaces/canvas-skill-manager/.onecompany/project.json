@@ -1,0 +1,91 @@
+{
+  "projectName": "canvas-skill-manager",
+  "projectDescription": "Canvas Skill & Agent 可视化管理系统",
+  "productMode": "mixed",
+  "createdAt": "2026-02-24T04:59:11.264Z",
+  "roleBundles": [
+    {
+      "role": "基础必备包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch"
+      ]
+    },
+    {
+      "role": "前端工程师包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "webapp-testing",
+        "canvas-design",
+        "theme-factory",
+        "gh-fix-ci"
+      ]
+    },
+    {
+      "role": "后端/全栈包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "mcp-builder",
+        "using-git-worktrees",
+        "gh-address-comments",
+        "gh-fix-ci"
+      ]
+    },
+    {
+      "role": "架构师包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "create-plan",
+        "mcp-builder",
+        "subagent-driven-development"
+      ]
+    },
+    {
+      "role": "产品与文档包",
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "systematic-debugging",
+        "requesting-code-review",
+        "verification-before-completion",
+        "finishing-a-development-branch",
+        "meeting-notes-and-actions",
+        "internal-comms",
+        "changelog-generator",
+        "content-research-writer"
+      ]
+    },
+    {
+      "role": "协同运营包",
+      "skills": [
+        "linear",
+        "connect",
+        "connect-apps"
+      ]
+    }
+  ]
+}

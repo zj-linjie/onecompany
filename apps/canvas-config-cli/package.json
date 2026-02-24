@@ -1,0 +1,12 @@
+{
+  "name": "@onecompany/canvas-config-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Canvas configuration CLI tool",
+  "bin": {
+    "canvas-config": "./index.mjs"
+  },
+  "scripts": {
+    "start": "node index.mjs"
+  }
+}
